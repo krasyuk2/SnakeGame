@@ -8,4 +8,8 @@
         <RootNamespace>SnakeGame</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\SnakeGame.Domain\SnakeGame.Domain.csproj" />
+    </ItemGroup>
+
 </Project>
