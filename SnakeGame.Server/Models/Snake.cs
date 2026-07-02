@@ -7,6 +7,8 @@ namespace SnakeGame.Models;
 /// </summary>
 public class Snake
 {
+    private char Symbol { get; } = '@';
+
     /// <summary>
     ///     Голова змеи.
     /// </summary>
@@ -20,7 +22,7 @@ public class Snake
     /// <summary>
     ///     Направление змейки.
     /// </summary>
-    private Directions _direction;
+    private Directions _direction = Directions.Right;
 
     /// <summary>
     ///     Добавление хвоста.
@@ -41,7 +43,11 @@ public class Snake
     /// <param name="position"></param>
     public void SetStartPosition(Point position)
     {
-        
+        var tails = GetTails();
+        foreach (var tail in tails)
+        {
+            tail.Position = position;
+        }
     }
 
     /// <summary>
@@ -50,7 +56,9 @@ public class Snake
     /// <param name="direction"> Направление. </param>
     public void SetDirection(Directions direction)
     {
-        
+        if(IsMirrorDirection(direction))
+            return;
+        _direction = direction;
     }
 
     /// <summary>
@@ -58,15 +66,66 @@ public class Snake
     /// </summary>
     public void Move()
     {
-        
+        var nextPoint = _direction switch
+        {
+            Directions.Up => new Point(0, -1, Symbol),
+            Directions.Down => new Point(0, 1, Symbol),
+            Directions.Left => new Point(-1, 0, Symbol),
+            Directions.Right => new Point(1, 0, Symbol),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        var currentPosition = _head!.Position;
+        SetNextStep(currentPosition);
+        _head.Position = currentPosition += nextPoint;
     }
 
     /// <summary>
     ///     Получить коллекцию элементов змейки.
     /// </summary>
     /// <returns> Коллекция змейки. </returns>
-    public IEnumerable<Point> GetTails()
+    public IEnumerable<Tail> GetTails()
     {
-        throw new NotImplementedException();
+        var tails = new List<Tail>();
+        var tempTail = _head;
+        while (tempTail != null)
+        {
+            tails.Add(tempTail);
+            tempTail = tempTail.Next;
+        }
+
+        return tails;
     }
+
+    /// <summary>
+    ///     Обновить положение хвоста змейки.
+    /// </summary>
+    /// <param name="position"></param>
+    private void SetNextStep(Point position)
+    {
+        var tempTail = _head!.Next;
+        var tempPos = position;
+        while (tempTail != null)
+        {
+            if (!tempPos.Equals(tempTail.Position))
+                (tempTail.Position, tempPos) = (tempPos, tempTail.Position);
+            else
+                tempPos = tempTail.Position;
+            
+            tempTail =  tempTail.Next;
+        }
+    }
+
+    /// <summary>
+    ///     Проверить является ли переданное направление зеркальным от текущего.
+    /// </summary>
+    /// <param name="direction"> Направление. </param>
+    /// <returns> Зеркальное ли направление. </returns>
+    private bool IsMirrorDirection(Directions direction) => _direction switch
+    {
+        Directions.Up => direction == Directions.Down,
+        Directions.Down => direction == Directions.Up,
+        Directions.Right => direction == Directions.Left,
+        Directions.Left => direction == Directions.Right,
+        _ => throw new ArgumentOutOfRangeException()
+    };
 }

@@ -1,4 +1,6 @@
-﻿namespace SnakeGame.Domain.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace SnakeGame.Domain.Models;
 
 /// <summary>
 ///     Модель позиции.
@@ -29,4 +31,20 @@ public struct Point
         Y = y;
         Symbol = symbol;
     }
+    
+    /// <summary>
+    ///     Оператор сложения координат.
+    /// </summary>
+    /// <param name="point"> Координата. </param>
+    public void operator += (Point point)
+    {
+        X += point.X;
+        Y += point.Y;
+    }
+
+    ///<inheritdoc/>
+    public override bool Equals([NotNullWhen(true)] object? obj) => obj is Point p && X == p.X && Y == p.Y;
+    
+    ///<inheritdoc/>
+    public override int GetHashCode() => HashCode.Combine(X, Y);
 }
