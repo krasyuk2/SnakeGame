@@ -24,6 +24,15 @@ public class Snake
     /// </summary>
     private Directions _direction = Directions.Right;
 
+    public Snake(Point startPosition)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            AddTail();
+        }
+        SetStartPosition(startPosition);
+    }
+
     /// <summary>
     ///     Добавление хвоста.
     /// </summary>
@@ -94,6 +103,23 @@ public class Snake
         }
 
         return tails;
+    }
+
+    /// <summary>
+    ///     Получить позиции змейки.
+    /// </summary>
+    /// <returns> Коллекция позиции змейки. </returns>
+    public IEnumerable<Point> GetSnakePoints()
+    {
+        var points = new List<Point>();
+        var tempTail = _head;
+        while (tempTail != null)
+        {
+            points.Add(tempTail.Position);
+            tempTail = tempTail.Next;
+        }
+
+        return points;
     }
 
     /// <summary>
