@@ -5,7 +5,7 @@ namespace SnakeGame.Domain.Models;
 /// <summary>
 ///     Модель позиции.
 /// </summary>
-public struct Point
+public struct Point : IEquatable<Point>
 {
     /// <summary>
     ///     Координата по X.
@@ -41,6 +41,8 @@ public struct Point
         X += point.X;
         Y += point.Y;
     }
+
+    public bool Equals(Point other) => X == other.X && Y == other.Y;
 
     ///<inheritdoc/>
     public override bool Equals([NotNullWhen(true)] object? obj) => obj is Point p && X == p.X && Y == p.Y;

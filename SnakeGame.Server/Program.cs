@@ -8,19 +8,29 @@ using SnakeGame.Models;
  
 var gameOptions = GameOptions.Initialization();
 
-Walls walls = new Walls(40,60);
+int height = 40;
+int width = 60;
+
+//Создание стен
+Walls walls = new Walls(width, height);
 walls.GenerateWalls();
 var wallsPos = walls.GetWallsPoint();
 
+//Инициализация бонуса
+Food food = new Food(width, height);
+
+//Включение сервера
 var ipEndPont = IPEndPoint.Parse(gameOptions.Address);
 var server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 server.Bind(ipEndPont);
 server.Listen(2);
 
+//Подключение игроков
 var player = await server.AcceptAsync();
 Snake snake = new Snake(new Point(5, 5, '@'));
 var player2 = await server.AcceptAsync();
 Snake snake2 = new Snake(new Point(25, 25, '@'));
+
 
 _ = Task.Run(async () =>
 {
@@ -50,15 +60,23 @@ while (true)
 {
     await Task.Delay(1000);
     
+    
     snake.Move();
     snake2.Move();
+
+    var snakeOnePosition = snake.GetSnakePoints();
+    var snakeTwoPosition = snake2.GetSnakePoints();
+    var snakeAllPosition = new List<Point>(snakeTwoPosition);
+    snakeAllPosition.AddRange(snakeOnePosition);
     
     GameState gameState = new GameState()
     {
-        PlayerOnePosition = snake.GetSnakePoints(),
-        PlayerTwoPosition = snake2.GetSnakePoints(),
-        WallsPosition = wallsPos
+        PlayerOnePosition = snakeOnePosition,
+        PlayerTwoPosition = snakeTwoPosition,
+        WallsPosition = wallsPos,
+        FoodPosition = food.FoodGenerator(snakeAllPosition)
     };
+    
     var json = JsonSerializer.Serialize(gameState);
     byte[] message = Encoding.UTF8.GetBytes(json);
     

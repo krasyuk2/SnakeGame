@@ -29,7 +29,7 @@ public class Walls
     /// </summary>
     private List<Point> _points;
 
-    public Walls(int height, int width)
+    public Walls(int width, int height)
     {
         _height = height - 1;
         _width = width - 1;
