@@ -27,7 +27,15 @@ public class Food
     /// </summary>
     private const int PADDING_WALLS = 2;
     
+    /// <summary>
+    ///     Класс рандома.
+    /// </summary>
     private readonly Random _random = new();
+
+    /// <summary>
+    ///     Текущая позиция бонуса.
+    /// </summary>
+    private Point _currentPosition;
 
     /// <summary>
     ///     Конструктор.
@@ -52,8 +60,17 @@ public class Food
             int y = _random.Next(PADDING_WALLS, _height); 
             var point = new Point(x, y, _symbol);
             if (!excluded.Contains(point))
+            {
+                _currentPosition = point;
                 return point;
+            }
         }
         //TODO: Если места для спавна не будет, то будет бесконечный цикл
     }
+
+    /// <summary>
+    ///     Получить текущую позицию бонуса.
+    /// </summary>
+    /// <returns> Позиция бонуса. </returns>
+    public Point GetFoodPoint() => _currentPosition;
 }

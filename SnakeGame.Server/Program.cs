@@ -16,8 +16,7 @@ Walls walls = new Walls(width, height);
 walls.GenerateWalls();
 var wallsPos = walls.GetWallsPoint();
 
-//Инициализация бонуса
-Food food = new Food(width, height);
+
 
 //Включение сервера
 var ipEndPont = IPEndPoint.Parse(gameOptions.Address);
@@ -31,6 +30,17 @@ Snake snake = new Snake(new Point(5, 5, '@'));
 var player2 = await server.AcceptAsync();
 Snake snake2 = new Snake(new Point(25, 25, '@'));
 
+
+//Инициализация бонуса
+Food food = new Food(width, height);
+
+var snakeOnePosition = snake.GetSnakePoints();
+var snakeTwoPosition = snake2.GetSnakePoints();
+
+var snakeAllPosition = new List<Point>(snakeTwoPosition);
+snakeAllPosition.AddRange(snakeOnePosition);
+
+var foodPosition = food.FoodGenerator(snakeAllPosition);
 
 _ = Task.Run(async () =>
 {
@@ -58,28 +68,49 @@ _ = Task.Run(async () =>
 
 while (true)
 {
-    await Task.Delay(1000);
-    
+    await Task.Delay(500);
     
     snake.Move();
     snake2.Move();
-
-    var snakeOnePosition = snake.GetSnakePoints();
-    var snakeTwoPosition = snake2.GetSnakePoints();
-    var snakeAllPosition = new List<Point>(snakeTwoPosition);
-    snakeAllPosition.AddRange(snakeOnePosition);
+    
+    foodPosition = food.GetFoodPoint();
+    snakeOnePosition = snake.GetSnakePoints();
+    snakeTwoPosition = snake2.GetSnakePoints();
+    
+    if (snakeOnePosition.Contains(foodPosition))
+    {
+        snake.AddTail();
+        snakeAllPosition = new List<Point>(snakeTwoPosition);
+        snakeAllPosition.AddRange(snakeOnePosition);
+        foodPosition = food.FoodGenerator(snakeAllPosition);
+    }
+    
+    if (snakeTwoPosition.Contains(foodPosition))
+    {
+        snake2.AddTail();
+        snakeAllPosition = new List<Point>(snakeTwoPosition);
+        snakeAllPosition.AddRange(snakeOnePosition);
+        foodPosition = food.FoodGenerator(snakeAllPosition);
+    }
     
     GameState gameState = new GameState()
     {
         PlayerOnePosition = snakeOnePosition,
         PlayerTwoPosition = snakeTwoPosition,
         WallsPosition = wallsPos,
-        FoodPosition = food.FoodGenerator(snakeAllPosition)
+        FoodPosition = foodPosition
     };
     
     var json = JsonSerializer.Serialize(gameState);
     byte[] message = Encoding.UTF8.GetBytes(json);
     
-    await player.SendAsync(message);
-    await player2.SendAsync(message);
+    await SendMessageAsync(player, message);
+    await SendMessageAsync(player2, message);
+}
+
+async Task SendMessageAsync(Socket socket, byte[] message)
+{
+    byte[] length = BitConverter.GetBytes(message.Length); // 4 byte
+    await socket.SendAsync(length);
+    await socket.SendAsync(message);
 }

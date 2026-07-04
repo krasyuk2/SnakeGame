@@ -45,10 +45,35 @@ _ = Task.Run(async () =>
 while (true)
 {
     Array.Clear(readBuffer, 0, readBuffer.Length);
-    int bytesRead = await client.ReceiveAsync(readBuffer);
-    string jsonString = Encoding.UTF8.GetString(readBuffer, 0, bytesRead);
+    byte[] data = await ReceiveMessageAsync(client);
+    string jsonString = Encoding.UTF8.GetString(data);
     var model = JsonSerializer.Deserialize<GameState>(jsonString);
+    Console.Clear();
     draw.ListDrawPoint(model.PlayerOnePosition);
     draw.ListDrawPoint(model.PlayerTwoPosition);
     draw.ListDrawPoint(model.WallsPosition);
+    draw.SingleDrawPoint(model.FoodPosition);
+}
+
+
+async Task<byte[]> ReceiveMessageAsync(Socket socket)
+{
+    byte[] bufferLenght = new byte[4];
+    await ReceiveExtractAsync(socket, bufferLenght);
+    int length = BitConverter.ToInt32(bufferLenght, 0);
+    byte[] bufferMessage = new byte[length];
+    await ReceiveExtractAsync(socket, bufferMessage);
+    return bufferMessage;
+}
+
+async Task ReceiveExtractAsync(Socket socket, byte[] buffer)
+{
+    int totalRead = 0;
+    while (totalRead < buffer.Length)
+    {
+        int bytesRead = await socket.ReceiveAsync(buffer.AsMemory(totalRead));
+        if(bytesRead == 0)
+            throw new SocketException(500, "Соединение разорвано");
+        totalRead += bytesRead;
+    }
 }
