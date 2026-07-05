@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using SnakeGame.Domain.Applications;
 using SnakeGame.Domain.Models;
 using SnakeGame.Domain.Options;
 using SnakeGame.Models;
@@ -16,8 +17,6 @@ Walls walls = new Walls(width, height);
 walls.GenerateWalls();
 var wallsPos = walls.GetWallsPoint();
 
-
-
 //Включение сервера
 var ipEndPont = IPEndPoint.Parse(gameOptions.Address);
 var server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -30,7 +29,6 @@ Snake snake = new Snake(new Point(5, 5, '@'));
 var player2 = await server.AcceptAsync();
 Snake snake2 = new Snake(new Point(25, 25, '@'));
 
-
 //Инициализация бонуса
 Food food = new Food(width, height);
 
@@ -42,29 +40,20 @@ snakeAllPosition.AddRange(snakeOnePosition);
 
 var foodPosition = food.FoodGenerator(snakeAllPosition);
 
-_ = Task.Run(async () =>
+_ = Task.Run(async () => await GetDirectionSnake(player2, snake2));
+_ = Task.Run(async () => await GetDirectionSnake(player, snake));
+
+async Task GetDirectionSnake(Socket socket, Snake snake)
 {
     byte[] readBuffer = new byte[256];
     while (true)
     {
-        var answer = await player.ReceiveAsync(readBuffer);
+        var answer = await socket.ReceiveAsync(readBuffer);
         var directionString = Encoding.UTF8.GetString(readBuffer, 0, answer);
         var direction = JsonSerializer.Deserialize<Directions>(directionString);
         snake.SetDirection(direction);
     }
-});
-
-_ = Task.Run(async () =>
-{
-    byte[] readBuffer = new byte[256];
-    while (true)
-    {
-        var answer = await player2.ReceiveAsync(readBuffer);
-        var directionString = Encoding.UTF8.GetString(readBuffer, 0, answer);
-        var direction = JsonSerializer.Deserialize<Directions>(directionString);
-        snake2.SetDirection(direction);
-    }
-});
+}
 
 while (true)
 {
@@ -104,13 +93,6 @@ while (true)
     var json = JsonSerializer.Serialize(gameState);
     byte[] message = Encoding.UTF8.GetBytes(json);
     
-    await SendMessageAsync(player, message);
-    await SendMessageAsync(player2, message);
-}
-
-async Task SendMessageAsync(Socket socket, byte[] message)
-{
-    byte[] length = BitConverter.GetBytes(message.Length); // 4 byte
-    await socket.SendAsync(length);
-    await socket.SendAsync(message);
+    await player.SendMessageAsync(message);
+    await player2.SendMessageAsync(message);
 }
