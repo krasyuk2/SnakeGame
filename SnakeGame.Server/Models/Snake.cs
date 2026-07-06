@@ -24,6 +24,9 @@ public class Snake
     /// </summary>
     private Directions _direction = Directions.Right;
     
+    /// <summary>
+    ///     Головной элемент.
+    /// </summary>
     public Tail? Head => _head;
 
     public Snake(Point startPosition)
