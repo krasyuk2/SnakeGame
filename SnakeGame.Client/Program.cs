@@ -21,7 +21,6 @@ var ipEndPont = IPEndPoint.Parse(gameOptions.Address);
 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 await client.ConnectAsync(ipEndPont);
 Draw draw = new Draw();
-byte[] readBuffer = new byte[10240];
 
 _ = Task.Run(async () =>
 {
@@ -30,14 +29,19 @@ _ = Task.Run(async () =>
         if (Console.KeyAvailable)
         {
             ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-            var direction = keyInfo.Key switch
+            Directions? direction = keyInfo.Key switch
             {
                 ConsoleKey.A or ConsoleKey.LeftArrow => Directions.Left,
                 ConsoleKey.D or ConsoleKey.RightArrow => Directions.Right,
                 ConsoleKey.W or ConsoleKey.UpArrow => Directions.Up,
-                ConsoleKey.S or ConsoleKey.DownArrow => Directions.Down
+                ConsoleKey.S or ConsoleKey.DownArrow => Directions.Down,
+                _ => null
             };
-            var json = JsonSerializer.Serialize<Directions>(direction);
+            
+            if(direction is null)
+                continue;
+            
+            var json = JsonSerializer.Serialize<Directions>(direction.Value);
             await client.SendAsync(Encoding.UTF8.GetBytes(json));
         }
     }
@@ -45,7 +49,6 @@ _ = Task.Run(async () =>
 
 while (true)
 {
-    Array.Clear(readBuffer, 0, readBuffer.Length);
     byte[] data = await client.ReceiveMessageAsync();
     string jsonString = Encoding.UTF8.GetString(data);
     var model = JsonSerializer.Deserialize<GameState>(jsonString);

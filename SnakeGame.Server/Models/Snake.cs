@@ -23,6 +23,8 @@ public class Snake
     ///     Направление змейки.
     /// </summary>
     private Directions _direction = Directions.Right;
+    
+    public Tail? Head => _head;
 
     public Snake(Point startPosition)
     {

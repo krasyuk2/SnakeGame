@@ -31,29 +31,10 @@ Snake snake2 = new Snake(new Point(25, 25, '@'));
 
 //Инициализация бонуса
 Food food = new Food(width, height);
-
-var snakeOnePosition = snake.GetSnakePoints();
-var snakeTwoPosition = snake2.GetSnakePoints();
-
-var snakeAllPosition = new List<Point>(snakeTwoPosition);
-snakeAllPosition.AddRange(snakeOnePosition);
-
-var foodPosition = food.FoodGenerator(snakeAllPosition);
+var foodPosition = food.FoodGenerator(GetAllSnakePoints());
 
 _ = Task.Run(async () => await GetDirectionSnake(player2, snake2));
 _ = Task.Run(async () => await GetDirectionSnake(player, snake));
-
-async Task GetDirectionSnake(Socket socket, Snake snake)
-{
-    byte[] readBuffer = new byte[256];
-    while (true)
-    {
-        var answer = await socket.ReceiveAsync(readBuffer);
-        var directionString = Encoding.UTF8.GetString(readBuffer, 0, answer);
-        var direction = JsonSerializer.Deserialize<Directions>(directionString);
-        snake.SetDirection(direction);
-    }
-}
 
 while (true)
 {
@@ -62,30 +43,13 @@ while (true)
     snake.Move();
     snake2.Move();
     
-    foodPosition = food.GetFoodPoint();
-    snakeOnePosition = snake.GetSnakePoints();
-    snakeTwoPosition = snake2.GetSnakePoints();
-    
-    if (snakeOnePosition.Contains(foodPosition))
-    {
-        snake.AddTail();
-        snakeAllPosition = new List<Point>(snakeTwoPosition);
-        snakeAllPosition.AddRange(snakeOnePosition);
-        foodPosition = food.FoodGenerator(snakeAllPosition);
-    }
-    
-    if (snakeTwoPosition.Contains(foodPosition))
-    {
-        snake2.AddTail();
-        snakeAllPosition = new List<Point>(snakeTwoPosition);
-        snakeAllPosition.AddRange(snakeOnePosition);
-        foodPosition = food.FoodGenerator(snakeAllPosition);
-    }
+    TryEatFood(snake);
+    TryEatFood(snake2);
     
     GameState gameState = new GameState()
     {
-        PlayerOnePosition = snakeOnePosition,
-        PlayerTwoPosition = snakeTwoPosition,
+        PlayerOnePosition =  snake.GetSnakePoints(),
+        PlayerTwoPosition = snake2.GetSnakePoints(),
         WallsPosition = wallsPos,
         FoodPosition = foodPosition
     };
@@ -95,4 +59,31 @@ while (true)
     
     await player.SendMessageAsync(message);
     await player2.SendMessageAsync(message);
+}
+async Task GetDirectionSnake(Socket socket, Snake snake)
+{
+    while (true)
+    {
+        var data = await socket.ReceiveMessageAsync();
+        var direction = JsonSerializer.Deserialize<Directions>(
+            Encoding.UTF8.GetString(data));
+        snake.SetDirection(direction);
+    }
+}
+
+void TryEatFood(Snake snake)
+{
+    var head = snake.Head;
+    if (head!.Position.Equals(foodPosition))
+    {
+        snake.AddTail();
+        foodPosition = food.FoodGenerator(GetAllSnakePoints());
+    }
+}
+
+List<Point> GetAllSnakePoints()
+{
+    var all = new List<Point>(snake.GetSnakePoints());
+    all.AddRange(snake2.GetSnakePoints());
+    return all;
 }
