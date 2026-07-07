@@ -10,7 +10,12 @@ public class Food
     /// <summary>
     ///     Символ отображения.
     /// </summary>
-    private char _symbol = '%';
+    private char _symbol;
+    
+    /// <summary>
+    ///     Приоритет отрисовки.
+    /// </summary>
+    private readonly int _priority;
     
     /// <summary>
     ///     Высота.
@@ -23,7 +28,7 @@ public class Food
     private int _width;
 
     /// <summary>
-    ///     Отступ от границы карты, чтобы не учитывать сразу стены.
+    ///     Отступ от границы карты, чтобы не учитывать стены.
     /// </summary>
     private const int PADDING_WALLS = 2;
     
@@ -40,10 +45,12 @@ public class Food
     /// <summary>
     ///     Конструктор.
     /// </summary>
-    public Food(int width, int height)
+    public Food(int width, int height, char symbol, int priority  = 0)
     {
         _width = width - PADDING_WALLS;
         _height = height - PADDING_WALLS;
+        _symbol = symbol;
+        _priority = priority;
     }
     
     /// <summary>
@@ -58,7 +65,7 @@ public class Food
         {
             int x = _random.Next(PADDING_WALLS, _width);
             int y = _random.Next(PADDING_WALLS, _height); 
-            var point = new Point(x, y, _symbol);
+            var point = new Point(x, y, _symbol, _priority);
             if (!excluded.Contains(point))
             {
                 _currentPosition = point;

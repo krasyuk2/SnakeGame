@@ -11,6 +11,21 @@ public class GameOptions
     ///     Адрес сервера.
     /// </summary>
     public string Address { get; set; } = "127.0.0.1:7777";
+    
+    /// <summary>
+    ///     Настройки отображения змеи.
+    /// </summary>
+    public DisplayElement Snake { get; set; }
+    
+    /// <summary>
+    ///     Настройки отображения стены.
+    /// </summary>
+    public DisplayElement Wall { get; set; }
+    
+    /// <summary>
+    ///     Настройки отображения бонуса.
+    /// </summary>
+    public DisplayElement Food { get; set; }
 
     /// <summary>
     ///     Инициализация настроек.

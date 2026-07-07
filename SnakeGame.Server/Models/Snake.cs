@@ -7,8 +7,16 @@ namespace SnakeGame.Models;
 /// </summary>
 public class Snake
 {
-    private char Symbol { get; } = '@';
+    /// <summary>
+    ///     Символ отображения.
+    /// </summary>
+    private readonly char _symbol;
 
+    /// <summary>
+    ///     Приоритет отрисовки.
+    /// </summary>
+    private readonly int _priority;
+    
     /// <summary>
     ///     Голова змеи.
     /// </summary>
@@ -29,8 +37,10 @@ public class Snake
     /// </summary>
     public Tail? Head => _head;
 
-    public Snake(Point startPosition)
+    public Snake(Point startPosition, char symbol, int priority = 0)
     {
+        _symbol = symbol;
+        _priority = priority;
         for (int i = 0; i < 5; i++)
         {
             AddTail();
@@ -82,10 +92,10 @@ public class Snake
     {
         var nextPoint = _direction switch
         {
-            Directions.Up => new Point(0, -1, Symbol),
-            Directions.Down => new Point(0, 1, Symbol),
-            Directions.Left => new Point(-1, 0, Symbol),
-            Directions.Right => new Point(1, 0, Symbol),
+            Directions.Up => new Point(0, -1, _symbol, _priority),
+            Directions.Down => new Point(0, 1, _symbol, _priority),
+            Directions.Left => new Point(-1, 0, _symbol, _priority),
+            Directions.Right => new Point(1, 0, _symbol, _priority),
             _ => throw new ArgumentOutOfRangeException()
         };
         var currentPosition = _head!.Position;

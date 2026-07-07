@@ -42,7 +42,7 @@ _ = Task.Run(async () =>
                 continue;
             
             var json = JsonSerializer.Serialize<Directions>(direction.Value);
-            await client.SendAsync(Encoding.UTF8.GetBytes(json));
+            await client.SendMessageAsync(Encoding.UTF8.GetBytes(json));
         }
     }
 });
@@ -52,9 +52,13 @@ while (true)
     byte[] data = await client.ReceiveMessageAsync();
     string jsonString = Encoding.UTF8.GetString(data);
     var model = JsonSerializer.Deserialize<GameState>(jsonString);
-    Console.Clear();
-    draw.ListDrawPoint(model.PlayerOnePosition);
-    draw.ListDrawPoint(model.PlayerTwoPosition);
-    draw.ListDrawPoint(model.WallsPosition);
-    draw.SingleDrawPoint(model.FoodPosition);
+
+    var listPointDraw = new List<Point>();
+   
+    listPointDraw.AddRange(model.PlayerOnePosition);
+    listPointDraw.AddRange(model.PlayerTwoPosition);
+    listPointDraw.AddRange(model.WallsPosition);
+    listPointDraw.Add(model.FoodPosition);
+    
+    draw.ListDrawPoint(listPointDraw);
 }

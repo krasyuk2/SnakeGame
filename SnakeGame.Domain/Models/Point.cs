@@ -23,6 +23,11 @@ public struct Point : IEquatable<Point>
     public char Symbol { get; set; }
     
     /// <summary>
+    ///     Приоритет рисования.
+    /// </summary>
+    public int? DrawPriority { get; set; }
+    
+    /// <summary>
     ///     Конструктор.
     /// </summary>
     public Point(int x, int y, char symbol)
@@ -31,6 +36,18 @@ public struct Point : IEquatable<Point>
         Y = y;
         Symbol = symbol;
     }
+    
+    /// <summary>
+    ///     Конструктор.
+    /// </summary>
+    public Point(int x, int y, char symbol, int drawPriority)
+    {
+        X = x;
+        Y = y;
+        Symbol = symbol;
+        DrawPriority = drawPriority;
+    }
+
     
     /// <summary>
     ///     Оператор сложения координат.

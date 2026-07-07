@@ -1,6 +1,4 @@
-﻿
-
-using SnakeGame.Domain.Models;
+﻿using SnakeGame.Domain.Models;
 
 namespace SnakeGame.Models;
 
@@ -12,27 +10,37 @@ public class Walls
     /// <summary>
     ///     Символ отрисовки.
     /// </summary>
-    private char Symbol = '#';
+    private readonly char _symbol;
+    
+    /// <summary>
+    ///     Приоритет отрисовки.
+    /// </summary>
+    private readonly int _priority;
     
     /// <summary>
     ///     Высота.
     /// </summary>
-    private int _height;
+    private readonly int _height;
     
     /// <summary>
     ///     Ширина.
     /// </summary>
-    private int _width;
+    private readonly int _width;
     
     /// <summary>
     ///     Коллекция стен.
     /// </summary>
     private List<Point> _points;
 
-    public Walls(int width, int height)
+    /// <summary>
+    ///     Конструктор
+    /// </summary>
+    public Walls(int width, int height, char symbol, int priority = 0)
     {
         _height = height - 1;
         _width = width - 1;
+        _symbol = symbol;
+        _priority =  priority;
     }
     
     /// <summary>
@@ -47,13 +55,15 @@ public class Walls
             {
                 X = 0,
                 Y = i,
-                Symbol = Symbol
+                Symbol = _symbol,
+                DrawPriority = _priority
             };
             var point2 = new Point()
             {
                 X = _width,
                 Y = i,
-                Symbol = Symbol
+                Symbol = _symbol,
+                DrawPriority = _priority
             };
             _points.AddRange(point1,point2);
         }
@@ -63,13 +73,15 @@ public class Walls
             {
                 X = i,
                 Y = 0,
-                Symbol = Symbol
+                Symbol = _symbol,
+                DrawPriority = _priority
             };
             var point2 = new Point()
             {
                 X = i,
                 Y = _height,
-                Symbol = Symbol
+                Symbol = _symbol,
+                DrawPriority = _priority
             };
             _points.AddRange(point1,point2);
         }
