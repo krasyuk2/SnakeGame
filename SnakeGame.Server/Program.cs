@@ -49,6 +49,11 @@ while (true)
     snake.Move();
     snake2.Move();
     
+    var isSnakeOneCollision = IsCollision(snake);
+    var isSnakeTwoCollision = IsCollision(snake2);
+    if(isSnakeOneCollision || isSnakeTwoCollision)
+        throw new Exception();
+    
     TryEatFood(snake);
     TryEatFood(snake2);
     
@@ -92,4 +97,16 @@ List<Point> GetAllSnakePoints()
     var all = new List<Point>(snake.GetSnakePoints());
     all.AddRange(snake2.GetSnakePoints());
     return all;
+}
+
+bool IsCollision(Snake snake)
+{
+    var collisionList = GetAllSnakePoints();
+    var snakeHead = snake.Head!.Position;
+    collisionList.Remove(snakeHead);
+    collisionList.AddRange(wallsPos);
+
+    if (collisionList.Any(x => x.Equals(snakeHead)))
+        return true;
+    return false;
 }

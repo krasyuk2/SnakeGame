@@ -30,7 +30,12 @@ public class Snake
     /// <summary>
     ///     Направление змейки.
     /// </summary>
-    private Directions _direction = Directions.Right;
+    private Directions _nextDirection = Directions.Right;
+    
+    /// <summary>
+    ///     Текущее направление змейки.
+    /// </summary>
+    private Directions _currentDirection = Directions.Right;
     
     /// <summary>
     ///     Головной элемент.
@@ -82,7 +87,7 @@ public class Snake
     {
         if(IsMirrorDirection(direction))
             return;
-        _direction = direction;
+        _nextDirection = direction;
     }
 
     /// <summary>
@@ -90,7 +95,7 @@ public class Snake
     /// </summary>
     public void Move()
     {
-        var nextPoint = _direction switch
+        var nextPoint = _nextDirection switch
         {
             Directions.Up => new Point(0, -1, _symbol, _priority),
             Directions.Down => new Point(0, 1, _symbol, _priority),
@@ -98,6 +103,7 @@ public class Snake
             Directions.Right => new Point(1, 0, _symbol, _priority),
             _ => throw new ArgumentOutOfRangeException()
         };
+        _currentDirection = _nextDirection;
         var currentPosition = _head!.Position;
         SetNextStep(currentPosition);
         _head.Position = currentPosition += nextPoint;
@@ -161,9 +167,9 @@ public class Snake
     /// </summary>
     /// <param name="direction"> Направление. </param>
     /// <returns> Зеркальное ли направление. </returns>
-    private bool IsMirrorDirection(Directions direction) => _direction switch
+    private bool IsMirrorDirection(Directions direction) => _currentDirection switch
     {
-        Directions.Up => direction == Directions.Down,
+        Directions.Up => direction == Directions.Down ,
         Directions.Down => direction == Directions.Up,
         Directions.Right => direction == Directions.Left,
         Directions.Left => direction == Directions.Right,
