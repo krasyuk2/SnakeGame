@@ -11,6 +11,11 @@ public class GameOptions
     ///     Адрес сервера.
     /// </summary>
     public string Address { get; set; } = "127.0.0.1:7777";
+
+    /// <summary>
+    ///     Задержка между игровыми тиками.
+    /// </summary>
+    public int GameTick { get; set; } = 500;
     
     /// <summary>
     ///     Настройки отображения змеи.
