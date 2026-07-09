@@ -161,6 +161,7 @@ public class Snake
             tempTail =  tempTail.Next;
         }
     }
+    
 
     /// <summary>
     ///     Проверить является ли переданное направление зеркальным от текущего.

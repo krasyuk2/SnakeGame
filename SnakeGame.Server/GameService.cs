@@ -53,7 +53,7 @@ public class GameService
     /// <summary>
     ///     Позиция стен.
     /// </summary>
-    private List<Point> _wallsPos;
+    private IEnumerable<Point> _wallsPos;
 
     /// <summary>
     ///     Конструктор.
@@ -75,6 +75,10 @@ public class GameService
     /// </summary>
     public async Task StartGame()
     {
+        _foodPosition = _food.FoodGenerator(GetAllSnakePoints());
+        _walls.GenerateWalls();
+        _wallsPos = _walls.GetWallsPoint();
+        
         _ = Task.Run(async () => await GetDirectionSnake(_player1, _snake1));
         _ = Task.Run(async () => await GetDirectionSnake(_player2, _snake2));
         
@@ -166,4 +170,28 @@ public class GameService
             return true;
         return false;
     }
+
+    /// <summary>
+    ///     Пересоздать змейку со стартовыми значениями.
+    /// </summary>
+    /// <param name="snake"> Змея. </param>
+    private void ResetSnake(Snake snake)
+    {
+        //Обрезаем змейку до 5 элементов
+        var tempTail = snake.Head;
+        for (int i = 0; i < 5; i++) tempTail = tempTail!.Next;
+        tempTail?.Next = null;
+    }
+
+    private Point GetSpawnPointSnake(Snake snake)
+    {
+        var otherSnake = ReferenceEquals(snake, _snake1) ? _snake2 : _snake1;
+        var excluded = new HashSet<(int x, int y)>();
+        foreach (var wall in _wallsPos) excluded.Add((wall.X, wall.Y));
+        foreach (var snakePoint in otherSnake.GetSnakePoints()) excluded.Add((snakePoint.X, snakePoint.Y));
+
+
+        throw new NotImplementedException();
+    }
+    
 }
