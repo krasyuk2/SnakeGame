@@ -31,6 +31,11 @@ public class GameOptions
     ///     Настройки отображения бонуса.
     /// </summary>
     public DisplayElement Food { get; set; }
+    
+    /// <summary>
+    ///     Настройки размера карты.
+    /// </summary>
+    public MapSizeSettings MapSize { get; set; }
 
     /// <summary>
     ///     Инициализация настроек.

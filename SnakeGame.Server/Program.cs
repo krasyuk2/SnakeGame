@@ -7,8 +7,8 @@ using SnakeGame.Models;
  
 var gameOptions = GameOptions.Initialization();
 
-int height = 40;
-int width = 60;
+int height = gameOptions.MapSize.Height;
+int width = gameOptions.MapSize.Width;
 
 //Создание стен
 var wallSymbol = gameOptions.Wall.Symbol;

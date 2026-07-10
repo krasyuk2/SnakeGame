@@ -56,6 +56,11 @@ public class GameService
     private IEnumerable<Point> _wallsPos;
 
     /// <summary>
+    ///     Псевдо рандом.
+    /// </summary>
+    private Random random = new();
+
+    /// <summary>
     ///     Конструктор.
     /// </summary>
     public GameService(Socket player1, Socket player2, Snake snake1, Snake snake2, Walls walls, Food food,
@@ -91,8 +96,12 @@ public class GameService
     
             var isSnakeOneCollision = IsCollision(_snake1);
             var isSnakeTwoCollision = IsCollision(_snake2);
-            if(isSnakeOneCollision || isSnakeTwoCollision)
-                throw new Exception();
+            
+            if(isSnakeOneCollision)
+                ResetSnake(_snake1);
+            
+            if(isSnakeTwoCollision)
+                ResetSnake(_snake2);
     
             TryEatFood(_snake1);
             TryEatFood(_snake2);
@@ -177,12 +186,23 @@ public class GameService
     /// <param name="snake"> Змея. </param>
     private void ResetSnake(Snake snake)
     {
+        var newSpawnPoint = GetSpawnPointSnake(snake);
+        
         //Обрезаем змейку до 5 элементов
         var tempTail = snake.Head;
-        for (int i = 0; i < 5; i++) tempTail = tempTail!.Next;
+        for (int i = 0; i < 4; i++)
+        {
+            tempTail.Position = newSpawnPoint;
+            tempTail = tempTail!.Next;
+        }
         tempTail?.Next = null;
     }
 
+    /// <summary>
+    ///     Получить точку spawn(a) змейки.
+    /// </summary>
+    /// <param name="snake"> Змея. </param>
+    /// <returns> Координата spawn(а). </returns>
     private Point GetSpawnPointSnake(Snake snake)
     {
         var otherSnake = ReferenceEquals(snake, _snake1) ? _snake2 : _snake1;
@@ -190,8 +210,35 @@ public class GameService
         foreach (var wall in _wallsPos) excluded.Add((wall.X, wall.Y));
         foreach (var snakePoint in otherSnake.GetSnakePoints()) excluded.Add((snakePoint.X, snakePoint.Y));
 
-
-        throw new NotImplementedException();
+        var spawnList = new List<Point>();
+        
+        for (int y = 0; y < _gameOptions.MapSize.Height; y++)
+        for (int x = 0; x < _gameOptions.MapSize.Width; x++)
+        {
+            if (IsTrySpawn(x, y, excluded))
+                spawnList.Add(new Point(x, y, _gameOptions.Snake.Symbol, _gameOptions.Snake.Priority));
+        }
+        if(spawnList.Count == 0)
+            throw new NotImplementedException();
+        
+        return spawnList[random.Next(spawnList.Count)];
     }
-    
+
+    /// <summary>
+    ///     Проверить свободен ли квадрат 3x3 вокруг спавна.
+    /// </summary>
+    /// <param name="x"> X </param>
+    /// <param name="y"> Y </param>
+    /// <param name="excluded"> Координаты на которых что-то есть. </param>
+    /// <returns> Свободно ли 3x3 вокруг координаты. </returns>
+    private bool IsTrySpawn(int x, int y, HashSet<(int x, int y)> excluded)
+    {
+        for (int dy = -1; dy <= 1; dy++)
+        for (int dx = -1; dx <= 1; dx++)
+        {
+            if(excluded.Contains((dx + x, dy + y)))
+                return false;
+        }
+        return true;
+    }
 }
