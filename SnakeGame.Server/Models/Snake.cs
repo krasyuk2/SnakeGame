@@ -42,14 +42,19 @@ public class Snake
     /// </summary>
     public Tail? Head => _head;
 
-    public Snake(Point startPosition, char symbol, int priority = 0)
+    /// <summary>
+    ///     Длина змейки.
+    /// </summary>
+    private int _tailCount = 0;
+
+    private readonly int _defaultSize;
+
+    public Snake(Point startPosition, char symbol, int priority = 0, int snakeDefaultSize = 5)
     {
         _symbol = symbol;
         _priority = priority;
-        for (int i = 0; i < 5; i++)
-        {
-            AddTail();
-        }
+        _defaultSize = snakeDefaultSize;
+        CreateSnakeDefaultSize();     
         SetStartPosition(startPosition);
     }
 
@@ -64,6 +69,7 @@ public class Snake
         else
             _tail!.Next = tail;
         _tail = tail;
+        _tailCount++;
     }
 
     /// <summary>
@@ -144,6 +150,19 @@ public class Snake
     }
 
     /// <summary>
+    ///     Обрезать змейку до базового значения.
+    /// </summary>
+    public void ResetSizeSnake()
+    {
+        var tempTail = _head;
+        for (int i = 0; i < _defaultSize - 1; i++)
+        {
+            tempTail = tempTail!.Next;
+        }
+        tempTail?.Next = null;
+    }
+
+    /// <summary>
     ///     Обновить положение хвоста змейки.
     /// </summary>
     /// <param name="position"></param>
@@ -176,4 +195,15 @@ public class Snake
         Directions.Left => direction == Directions.Right,
         _ => throw new ArgumentOutOfRangeException()
     };
+
+    /// <summary>
+    ///     Создать змейку default зачения.
+    /// </summary>
+    private void CreateSnakeDefaultSize()
+    {
+        for (int i = 0; i < _defaultSize; i++)
+        {
+            AddTail();
+        }
+    }
 }

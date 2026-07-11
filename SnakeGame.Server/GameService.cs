@@ -102,7 +102,7 @@ public class GameService
             
             if(isSnakeTwoCollision)
                 ResetSnake(_snake2);
-    
+
             TryEatFood(_snake1);
             TryEatFood(_snake2);
     
@@ -142,14 +142,16 @@ public class GameService
     ///     Сбила ли лицом змея бонус.
     /// </summary>
     /// <param name="snake"> Python. </param>
-    private void TryEatFood(Snake snake)
+    private bool TryEatFood(Snake snake)
     {
         var head = snake.Head;
         if (head!.Position.Equals(_foodPosition))
         {
             snake.AddTail();
             _foodPosition = _food.FoodGenerator(GetAllSnakePoints());
+            return true;
         }
+        return false;
     }
 
     /// <summary>
@@ -187,15 +189,8 @@ public class GameService
     private void ResetSnake(Snake snake)
     {
         var newSpawnPoint = GetSpawnPointSnake(snake);
-        
-        //Обрезаем змейку до 5 элементов
-        var tempTail = snake.Head;
-        for (int i = 0; i < 4; i++)
-        {
-            tempTail.Position = newSpawnPoint;
-            tempTail = tempTail!.Next;
-        }
-        tempTail?.Next = null;
+        snake.ResetSizeSnake();
+        snake.SetStartPosition(newSpawnPoint);
     }
 
     /// <summary>

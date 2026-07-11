@@ -38,6 +38,11 @@ public class GameOptions
     public MapSizeSettings MapSize { get; set; }
 
     /// <summary>
+    ///     Базовый размер змейки;
+    /// </summary>
+    public int SnakeDefaultSize = 5;
+
+    /// <summary>
     ///     Инициализация настроек.
     /// </summary>
     /// <returns> Настройки игры. </returns>
