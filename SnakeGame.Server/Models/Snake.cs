@@ -47,7 +47,18 @@ public class Snake
     /// </summary>
     private int _tailCount = 0;
 
+    /// <summary>
+    ///     Базовый размер змейки.
+    /// </summary>
     private readonly int _defaultSize;
+
+    /// <summary>
+    ///     Доступ для поля без записи на длину змейки.
+    /// </summary>
+    public int TailCount
+    {
+        get => _tailCount;
+    }
 
     public Snake(Point startPosition, char symbol, int priority = 0, int snakeDefaultSize = 5)
     {

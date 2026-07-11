@@ -102,6 +102,11 @@ public class GameService
             
             if(isSnakeTwoCollision)
                 ResetSnake(_snake2);
+            
+            if(_snake1.TailCount >= _gameOptions.GameNumberWin)
+                Win();
+            if(_snake2.TailCount >= _gameOptions.GameNumberWin)
+                Win();
 
             TryEatFood(_snake1);
             TryEatFood(_snake2);
@@ -235,5 +240,10 @@ public class GameService
                 return false;
         }
         return true;
+    }
+
+    private void Win()
+    {
+        
     }
 }
