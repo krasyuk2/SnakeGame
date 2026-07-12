@@ -70,4 +70,16 @@ public class Draw
             SingleClear(point);
         }
     }
+
+    /// <summary>
+    ///     Отрисовать текст.
+    /// </summary>
+    /// <param name="x"> X. </param>
+    /// <param name="y"> Y. </param>
+    /// <param name="text"> Текст. </param>
+    public void DrawText(int x, int y, string text)
+    {
+        Console.SetCursorPosition(x, y);
+        Console.Write(text);
+    }
 }

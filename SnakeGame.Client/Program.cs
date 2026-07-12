@@ -8,19 +8,44 @@ using SnakeGame.Domain.Models;
 using SnakeGame.Domain.Options;
 using SnakeGame.Models;
 
+var gameOptions = GameOptions.Initialization();
+
+const int panelWidth = 30;
+var panelX = gameOptions.MapSize.Width + 2;
+var panelRightBorderX = gameOptions.MapSize.Width + panelWidth - 2;
+var panelTextWidth = panelWidth - 4;
+
 if (OperatingSystem.IsWindows())
 {
+    var windowWidth = gameOptions.MapSize.Width + panelWidth;
+    var windowHeight = gameOptions.MapSize.Height + 1;
+    
     Console.SetWindowSize(1, 1); 
-    Console.SetBufferSize(80, 50);
-    Console.SetWindowSize(60, 40);    
+    Console.SetBufferSize(windowWidth, windowHeight);
+    Console.SetWindowSize(windowWidth, windowHeight);    
 }
 
-var gameOptions = GameOptions.Initialization();
 var ipEndPont = IPEndPoint.Parse(gameOptions.Address);
 
 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 await client.ConnectAsync(ipEndPont);
 Draw draw = new Draw();
+
+var panelBottomY = gameOptions.MapSize.Height - 1;
+var borderTop = Enumerable.Range(gameOptions.MapSize.Width, panelWidth - 1)
+    .Select(x => new Point(x, 0, x == gameOptions.MapSize.Width || x == panelRightBorderX ? '+' : '-', 0));
+var borderBottom = Enumerable.Range(gameOptions.MapSize.Width, panelWidth - 1)
+    .Select(x => new Point(x, panelBottomY, x == gameOptions.MapSize.Width || x == panelRightBorderX ? '+' : '-', 0));
+var borderLeft = Enumerable.Range(1, panelBottomY - 1)
+    .Select(y => new Point(gameOptions.MapSize.Width, y, '|', 0));
+var borderRight = Enumerable.Range(1, panelBottomY - 1)
+    .Select(y => new Point(panelRightBorderX, y, '|', 0));
+
+var panelBorder = borderTop.Concat(borderBottom).Concat(borderLeft).Concat(borderRight);
+foreach (var point in panelBorder)
+{
+    draw.SingleDrawPoint(point);
+}
 
 _ = Task.Run(async () =>
 {
@@ -61,4 +86,8 @@ while (true)
     listPointDraw.Add(model.FoodPosition);
     
     draw.ListDrawPoint(listPointDraw);
+
+    draw.DrawText(panelX, 2, $"Игрок 1 : {model.PlayerOnePosition.Count()}");
+    draw.DrawText(panelX, 3, $"Игрок 2 : {model.PlayerTwoPosition.Count()}");
+    draw.DrawText(panelX, 4, $"Очков для победы : {gameOptions.GameNumberWin}");
 }

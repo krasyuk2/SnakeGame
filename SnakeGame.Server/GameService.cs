@@ -1,6 +1,7 @@
 ﻿using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using Microsoft.VisualBasic;
 using SnakeGame.Domain.Applications;
 using SnakeGame.Domain.Models;
 using SnakeGame.Domain.Options;
@@ -58,7 +59,7 @@ public class GameService
     /// <summary>
     ///     Псевдо рандом.
     /// </summary>
-    private Random random = new();
+    private Random _random = new();
 
     /// <summary>
     ///     Конструктор.
@@ -219,9 +220,9 @@ public class GameService
                 spawnList.Add(new Point(x, y, _gameOptions.Snake.Symbol, _gameOptions.Snake.Priority));
         }
         if(spawnList.Count == 0)
-            throw new NotImplementedException();
+            Win();
         
-        return spawnList[random.Next(spawnList.Count)];
+        return spawnList[_random.Next(spawnList.Count)];
     }
 
     /// <summary>
@@ -242,6 +243,9 @@ public class GameService
         return true;
     }
 
+    /// <summary>
+    ///     Победа.
+    /// </summary>
     private void Win()
     {
         
