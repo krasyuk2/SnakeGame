@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using SnakeGame.Client.Applications;
 using SnakeGame.Client.Models;
 using SnakeGame.Domain.Applications;
 using SnakeGame.Domain.Models;
@@ -25,24 +26,20 @@ if (OperatingSystem.IsWindows())
     Console.SetWindowSize(windowWidth, windowHeight);    
 }
 
+MainMenu mainMenu = new MainMenu();
+await mainMenu.Start();
+
+
+
+
+
+
+
+
 var ipEndPont = IPEndPoint.Parse(gameOptions.Address);
 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-try
-{
-    if(!await ConnectToServer(client))
-    {
-        throw new TimeoutException($"Сервер полон. 2 из 2 игроков заняли сервер.");
-    }
-}
-catch (SocketException)
-{
-    ReturnMainExceptionMessage($"Не запущен сервер по указанному адресу: {gameOptions.Address}");
-}
-catch (TimeoutException ex)
-{
-    ReturnMainExceptionMessage(ex.Message);
-}
+await client.ConnectAsync(ipEndPont);
 
 Draw draw = new Draw();
 
@@ -113,43 +110,5 @@ void DrawUserInterfaceBorder()
     foreach (var point in GetEnumerableRightUserInterfaceBorder())
     {
         draw.SingleDrawPoint(point);
-    }
-}
-
-void ReturnMainExceptionMessage(string message)
-{
-    Console.WriteLine(message);
-    Console.WriteLine("Нажмите что-нибуть для продолжения...");
-    Console.ReadLine();
-    Environment.Exit(0);
-}
-
-async Task<bool> ConnectToServer(Socket client)
-{
-    try
-    { 
-       await client.ConnectAsync(ipEndPont);
-       if (client.Connected)
-           return true;
-       
-    }
-    catch (Exception)
-    {
-        throw new SocketException();
-    }
-    
-    using TcpClient clientCheck = new TcpClient();
-    try
-    {
-        var resultAsync = clientCheck.BeginConnect(ipEndPont.Address, ipEndPont.Port, null, null);
-        bool success = resultAsync.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1));
-        if (!success)
-            return false;
-        clientCheck.EndConnect(resultAsync);
-        return true;
-    }
-    catch
-    {
-        return false;
     }
 }

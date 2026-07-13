@@ -1,13 +1,12 @@
 ﻿using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
-using Microsoft.VisualBasic;
 using SnakeGame.Domain.Applications;
 using SnakeGame.Domain.Models;
 using SnakeGame.Domain.Options;
 using SnakeGame.Models;
 
-namespace SnakeGame;
+namespace SnakeGame.Applications;
 
 public class GameService
 {
