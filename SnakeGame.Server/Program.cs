@@ -26,8 +26,9 @@ var snakeSymbol = gameOptions.Snake.Symbol;
 var snakeDrawPriority = gameOptions.Snake.Priority;
 
 var player = await server.AcceptAsync();
-Snake snake = new Snake(new Point(5, 5, snakeSymbol, snakeDrawPriority),snakeSymbol, snakeDrawPriority);
 var player2 = await server.AcceptAsync();
+
+Snake snake = new Snake(new Point(5, 5, snakeSymbol, snakeDrawPriority),snakeSymbol, snakeDrawPriority);
 Snake snake2 = new Snake(new Point(25, 25, snakeSymbol, snakeDrawPriority),snakeSymbol, snakeDrawPriority);
 
 //Инициализация бонуса

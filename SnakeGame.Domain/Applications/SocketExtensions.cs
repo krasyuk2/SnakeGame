@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 
 namespace SnakeGame.Domain.Applications;
 
@@ -20,7 +21,7 @@ public static class SocketExtensions
             await ReceiveExtractAsync(socket, bufferMessage);
             return bufferMessage;
         }
-        
+
         /// <summary>
         ///     Отправляем сперва длину сообщения, а после само сообщение.
         /// </summary>
@@ -32,7 +33,7 @@ public static class SocketExtensions
             await socket.SendAsync(message);
         }
     }
-    
+
     /// <summary>
     ///     Принимаем по указанной длине буфера сообщение, Пока не заполнится вся длинна. 
     /// </summary>

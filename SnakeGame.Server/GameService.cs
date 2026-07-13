@@ -122,7 +122,7 @@ public class GameService
     
             var json = JsonSerializer.Serialize(gameState);
             byte[] message = Encoding.UTF8.GetBytes(json);
-    
+            
             await _player1.SendMessageAsync(message);
             await _player2.SendMessageAsync(message);
         }

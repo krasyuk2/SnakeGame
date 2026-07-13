@@ -26,26 +26,27 @@ if (OperatingSystem.IsWindows())
 }
 
 var ipEndPont = IPEndPoint.Parse(gameOptions.Address);
-
 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-await client.ConnectAsync(ipEndPont);
+
+try
+{
+    if(!await ConnectToServer(client))
+    {
+        throw new TimeoutException($"Сервер полон. 2 из 2 игроков заняли сервер.");
+    }
+}
+catch (SocketException)
+{
+    ReturnMainExceptionMessage($"Не запущен сервер по указанному адресу: {gameOptions.Address}");
+}
+catch (TimeoutException ex)
+{
+    ReturnMainExceptionMessage(ex.Message);
+}
+
 Draw draw = new Draw();
 
-var panelBottomY = gameOptions.MapSize.Height - 1;
-var borderTop = Enumerable.Range(gameOptions.MapSize.Width, panelWidth - 1)
-    .Select(x => new Point(x, 0, x == gameOptions.MapSize.Width || x == panelRightBorderX ? '+' : '-', 0));
-var borderBottom = Enumerable.Range(gameOptions.MapSize.Width, panelWidth - 1)
-    .Select(x => new Point(x, panelBottomY, x == gameOptions.MapSize.Width || x == panelRightBorderX ? '+' : '-', 0));
-var borderLeft = Enumerable.Range(1, panelBottomY - 1)
-    .Select(y => new Point(gameOptions.MapSize.Width, y, '|', 0));
-var borderRight = Enumerable.Range(1, panelBottomY - 1)
-    .Select(y => new Point(panelRightBorderX, y, '|', 0));
-
-var panelBorder = borderTop.Concat(borderBottom).Concat(borderLeft).Concat(borderRight);
-foreach (var point in panelBorder)
-{
-    draw.SingleDrawPoint(point);
-}
+DrawUserInterfaceBorder();
 
 _ = Task.Run(async () =>
 {
@@ -90,4 +91,65 @@ while (true)
     draw.DrawText(panelX, 2, $"Игрок 1 : {model.PlayerOnePosition.Count()}");
     draw.DrawText(panelX, 3, $"Игрок 2 : {model.PlayerTwoPosition.Count()}");
     draw.DrawText(panelX, 4, $"Очков для победы : {gameOptions.GameNumberWin}");
+}
+
+IEnumerable<Point> GetEnumerableRightUserInterfaceBorder()
+{
+    var panelBottomY = gameOptions.MapSize.Height - 1;
+    var borderTop = Enumerable.Range(gameOptions.MapSize.Width, panelWidth - 1)
+        .Select(x => new Point(x, 0, x == gameOptions.MapSize.Width || x == panelRightBorderX ? '+' : '-', 0));
+    var borderBottom = Enumerable.Range(gameOptions.MapSize.Width, panelWidth - 1)
+        .Select(x => new Point(x, panelBottomY, x == gameOptions.MapSize.Width || x == panelRightBorderX ? '+' : '-', 0));
+    var borderLeft = Enumerable.Range(1, panelBottomY - 1)
+        .Select(y => new Point(gameOptions.MapSize.Width, y, '|', 0));
+    var borderRight = Enumerable.Range(1, panelBottomY - 1)
+        .Select(y => new Point(panelRightBorderX, y, '|', 0));
+
+    return borderTop.Concat(borderBottom).Concat(borderLeft).Concat(borderRight);
+}
+
+void DrawUserInterfaceBorder()
+{
+    foreach (var point in GetEnumerableRightUserInterfaceBorder())
+    {
+        draw.SingleDrawPoint(point);
+    }
+}
+
+void ReturnMainExceptionMessage(string message)
+{
+    Console.WriteLine(message);
+    Console.WriteLine("Нажмите что-нибуть для продолжения...");
+    Console.ReadLine();
+    Environment.Exit(0);
+}
+
+async Task<bool> ConnectToServer(Socket client)
+{
+    try
+    { 
+       await client.ConnectAsync(ipEndPont);
+       if (client.Connected)
+           return true;
+       
+    }
+    catch (Exception)
+    {
+        throw new SocketException();
+    }
+    
+    using TcpClient clientCheck = new TcpClient();
+    try
+    {
+        var resultAsync = clientCheck.BeginConnect(ipEndPont.Address, ipEndPont.Port, null, null);
+        bool success = resultAsync.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(1));
+        if (!success)
+            return false;
+        clientCheck.EndConnect(resultAsync);
+        return true;
+    }
+    catch
+    {
+        return false;
+    }
 }
