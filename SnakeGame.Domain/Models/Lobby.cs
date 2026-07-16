@@ -6,6 +6,11 @@
 public class Lobby
 {
     /// <summary>
+    ///     Идентификатор лобби.
+    /// </summary>
+    public Guid Id { get; set; }
+    
+    /// <summary>
     ///     Что хотим сделать.
     /// </summary>
     public LobbyActions Action { get; set; }

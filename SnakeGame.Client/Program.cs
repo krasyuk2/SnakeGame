@@ -36,7 +36,15 @@ CreateLobbyService createLobbyService = new CreateLobbyService(client, ipEndPont
 switch (resultMenu)
 {
     case ChoiceMainMenuEnum.Create:
-        await createLobbyService.CreateLobby();
+        try
+        {
+            await createLobbyService.CreateLobby();
+        }
+        catch (Exception)
+        {
+            Console.WriteLine("Сервер не доступен.");
+            Environment.Exit(0);
+        }
         break;
     case ChoiceMainMenuEnum.Connect:
         //Тут мы слушаем brodcast или принимаем от сервера существующие. 

@@ -36,16 +36,11 @@ var server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolT
 server.Bind(ipEndPont);
 server.Listen(10);
 
-var sockets = new List<Socket>();
-var serverStatus =  ServerStatuses.Started;
-
 _ = Task.Run(async () =>
 {
     while (true)
     {   
         var player = await server.AcceptAsync();
-        var json = JsonSerializer.Serialize<ServerStatuses>(serverStatus);
-        await player.SendMessageAsync(Encoding.UTF8.GetBytes(json));
         
         var message = await player.ReceiveMessageAsync();
         string jsonString = Encoding.UTF8.GetString(message);
@@ -54,7 +49,7 @@ _ = Task.Run(async () =>
         switch (lobby!.Action)
         {
             case LobbyActions.Create:
-                //Создаем комнату (GameService) (переделать конструктор)
+                
                 break;
             case LobbyActions.Listen:
                 //отдаем список комнат (можно где есть места или все)
@@ -63,8 +58,6 @@ _ = Task.Run(async () =>
                //Подключение к выбранной комнате по id
                 break;
         }
-        
-        sockets.Add(player);
     }
 });
 

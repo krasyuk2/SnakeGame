@@ -36,20 +36,25 @@ public class CreateLobbyService
         try
         {
             await _client.ConnectAsync(_ipEndPoint);
-            var message = await _client.ReceiveMessageAsync();
-            string jsonString = Encoding.UTF8.GetString(message);
-            var statuses = JsonSerializer.Deserialize<ServerStatuses>(jsonString);
-            if (statuses == ServerStatuses.Started)
+        }
+        catch (Exception)
+        {
+            throw new Exception();
+        }
+        
+        Console.Clear();
+        Console.WriteLine("Введите название лобби:");
+        var lobbyName = Console.ReadLine() ?? Guid.NewGuid().ToString();
+        try
+        {
+            var createModel = new Lobby()
             {
-                var createModel = new Lobby()
-                {
-                    Name = "TestNameLobby",
-                    Action = LobbyActions.Create,
-                    MaxPlayers = 2
-                };
-                var json = JsonSerializer.Serialize<Lobby>(createModel);
-                await _client.SendMessageAsync(Encoding.UTF8.GetBytes(json));
-            }
+                Name = lobbyName,
+                Action = LobbyActions.Create,
+                MaxPlayers = 2
+            };
+            var json = JsonSerializer.Serialize<Lobby>(createModel);
+            await _client.SendMessageAsync(Encoding.UTF8.GetBytes(json));
         }
         catch (Exception e)
         {

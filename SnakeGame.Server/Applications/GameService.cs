@@ -11,14 +11,19 @@ namespace SnakeGame.Applications;
 public class GameService
 {
     /// <summary>
+    ///     Идентификатор игры. (а так же лобби)
+    /// </summary>
+    private Guid _id;
+    
+    /// <summary>
     ///     Сокет первого игрока.
     /// </summary>
-    private readonly Socket _player1;
+    private Socket _player1;
     
     /// <summary>
     ///     Сокет второго игрока.
     /// </summary>
-    private readonly Socket _player2;
+    private Socket _player2;
     
     /// <summary>
     ///     Змея первого игрока.
@@ -63,11 +68,9 @@ public class GameService
     /// <summary>
     ///     Конструктор.
     /// </summary>
-    public GameService(Socket player1, Socket player2, Snake snake1, Snake snake2, Walls walls, Food food,
+    public GameService(Snake snake1, Snake snake2, Walls walls, Food food,
         GameOptions gameOptions)
     {
-        _player1 = player1;
-        _player2 = player2;
         _snake1 = snake1;
         _snake2 = snake2;
         _walls = walls;
@@ -75,6 +78,25 @@ public class GameService
         _gameOptions = gameOptions;
     }
 
+    /// <summary>
+    ///     Создание игры - по сути лобби. - добавляем одного игрока.
+    /// </summary>
+    /// <param name="player"> Первый игрок. </param>
+    public void CreateGame(Socket player)
+    {
+        _id = Guid.NewGuid();
+        _player1 = player;
+    }
+
+    /// <summary>
+    ///     Подключится к игре.
+    /// </summary>
+    /// <param name="player"> Второй игрок. </param>
+    public void Connect(Socket player)
+    {
+        _player2 = player;
+    }
+    
     /// <summary>
     ///     Запустить игру.
     /// </summary>
