@@ -26,20 +26,23 @@ if (OperatingSystem.IsWindows())
     Console.SetWindowSize(windowWidth, windowHeight);    
 }
 
-MainMenu mainMenu = new MainMenu();
-await mainMenu.Start();
-
-
-
-
-
-
-
-
 var ipEndPont = IPEndPoint.Parse(gameOptions.Address);
 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-await client.ConnectAsync(ipEndPont);
+MainMenu mainMenu = new MainMenu();
+var resultMenu = await mainMenu.Start();
+
+CreateLobbyService createLobbyService = new CreateLobbyService(client, ipEndPont);
+switch (resultMenu)
+{
+    case ChoiceMainMenuEnum.Create:
+        await createLobbyService.CreateLobby();
+        break;
+    case ChoiceMainMenuEnum.Connect:
+        //Тут мы слушаем brodcast или принимаем от сервера существующие. 
+        break;
+}
+
 
 Draw draw = new Draw();
 

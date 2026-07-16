@@ -1,7 +1,10 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Text.Json;
 using SnakeGame;
 using SnakeGame.Applications;
+using SnakeGame.Domain.Applications;
 using SnakeGame.Domain.Models;
 using SnakeGame.Domain.Options;
 using SnakeGame.Models;
@@ -31,11 +34,42 @@ Food food = new Food(width, height,foodSymbol,foodDrawPriority);
 var ipEndPont = IPEndPoint.Parse(gameOptions.Address);
 var server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 server.Bind(ipEndPont);
-server.Listen(2);
+server.Listen(10);
 
-var player = await server.AcceptAsync();
-var player2 = await server.AcceptAsync();
+var sockets = new List<Socket>();
+var serverStatus =  ServerStatuses.Started;
 
+_ = Task.Run(async () =>
+{
+    while (true)
+    {   
+        var player = await server.AcceptAsync();
+        var json = JsonSerializer.Serialize<ServerStatuses>(serverStatus);
+        await player.SendMessageAsync(Encoding.UTF8.GetBytes(json));
+        
+        var message = await player.ReceiveMessageAsync();
+        string jsonString = Encoding.UTF8.GetString(message);
+        var lobby = JsonSerializer.Deserialize<Lobby>(jsonString);
+        
+        switch (lobby!.Action)
+        {
+            case LobbyActions.Create:
+                //Создаем комнату (GameService) (переделать конструктор)
+                break;
+            case LobbyActions.Listen:
+                //отдаем список комнат (можно где есть места или все)
+                break;
+            case LobbyActions.Connection:
+               //Подключение к выбранной комнате по id
+                break;
+        }
+        
+        sockets.Add(player);
+    }
+});
 
-GameService gameService = new GameService(player, player2, snake, snake2, walls, food, gameOptions);
-await gameService.StartGame();
+Console.ReadLine();
+
+/*GameService gameService = new GameService(player, player2, snake, snake2, walls, food, gameOptions);
+await gameService.StartGame();*/
+
