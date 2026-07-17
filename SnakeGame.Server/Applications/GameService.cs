@@ -14,6 +14,17 @@ public class GameService
     ///     Идентификатор игры. (а так же лобби)
     /// </summary>
     private Guid _id;
+
+    /// <summary>
+    ///     Наименование игры - лобби.
+    /// </summary>
+    private string _name;
+
+    /// <summary>
+    ///     Количество игроков.
+    /// </summary>
+    [Obsolete]
+    private int _mapPlayer = 2;
     
     /// <summary>
     ///     Сокет первого игрока.
@@ -28,17 +39,12 @@ public class GameService
     /// <summary>
     ///     Змея первого игрока.
     /// </summary>
-    private readonly Snake _snake1;
+    private Snake _snake1;
     
     /// <summary>
     ///     Змея второго игрока.
     /// </summary>
-    private readonly Snake _snake2;
-    
-    /// <summary>
-    ///     Стены.
-    /// </summary>
-    private readonly Walls _walls;
+    private Snake _snake2;
     
     /// <summary>
     ///     Бонусы.
@@ -58,7 +64,7 @@ public class GameService
     /// <summary>
     ///     Позиция стен.
     /// </summary>
-    private IEnumerable<Point> _wallsPos;
+    private readonly IEnumerable<Point> _wallsPos;
 
     /// <summary>
     ///     Псевдо рандом.
@@ -68,14 +74,13 @@ public class GameService
     /// <summary>
     ///     Конструктор.
     /// </summary>
-    public GameService(Snake snake1, Snake snake2, Walls walls, Food food,
+    public GameService(string name, IEnumerable<Point> wallsPos, Food food,
         GameOptions gameOptions)
     {
-        _snake1 = snake1;
-        _snake2 = snake2;
-        _walls = walls;
+        _wallsPos = wallsPos;
         _food = food;
         _gameOptions = gameOptions;
+        _name = name;
     }
 
     /// <summary>
@@ -86,6 +91,7 @@ public class GameService
     {
         _id = Guid.NewGuid();
         _player1 = player;
+        InitializeObjectGame();
     }
 
     /// <summary>
@@ -103,8 +109,6 @@ public class GameService
     public async Task StartGame()
     {
         _foodPosition = _food.FoodGenerator(GetAllSnakePoints());
-        _walls.GenerateWalls();
-        _wallsPos = _walls.GetWallsPoint();
         
         _ = Task.Run(async () => await GetDirectionSnake(_player1, _snake1));
         _ = Task.Run(async () => await GetDirectionSnake(_player2, _snake2));
@@ -147,6 +151,21 @@ public class GameService
             await _player1.SendMessageAsync(message);
             await _player2.SendMessageAsync(message);
         }
+    }
+
+    /// <summary>
+    ///     Вернуть информацию в виде модели лобби.
+    /// </summary>
+    /// <returns></returns>
+    public Lobby GetLobbyInformation()
+    {
+        return new Lobby()
+        {
+            Id = _id,
+            MaxPlayers = _mapPlayer,
+            Name = _name,
+            Action = LobbyActions.Listen
+        };
     }
     
     /// <summary>
@@ -270,5 +289,15 @@ public class GameService
     private void Win()
     {
         
+    }
+
+    private void InitializeObjectGame()
+    {
+        var snakeSymbol = _gameOptions.Snake.Symbol;
+        var snakeDrawPriority = _gameOptions.Snake.Priority;
+        Snake snake = new Snake(new Point(5, 5, snakeSymbol, snakeDrawPriority),snakeSymbol, snakeDrawPriority);
+        Snake snake2 = new Snake(new Point(25, 25, snakeSymbol, snakeDrawPriority),snakeSymbol, snakeDrawPriority);
+        _snake1 = snake;
+        _snake2 = snake2;
     }
 }
